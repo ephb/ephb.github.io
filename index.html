@@ -1,81 +1,430 @@
-<!DOCTYPE html>
-<html lang="de">
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Model Viewer Demo</title>
-    <link rel="icon" type="image/png" href="./favicon.png" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.5/css/bulma.min.css" integrity="sha256-vK3UTo/8wHbaUn+dTQD0X6dzidqc5l7gczvH+Bnowwk=" crossorigin="anonymous" />
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
-    <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.js"></script>
-    <script nomodule src="https://unpkg.com/@google/model-viewer/dist/model-viewer-legacy.js"></script>
-  </head>
-  <body>
 
-    <!-- HERO -->
+                        <!DOCTYPE html>
+                        <html lang="en">
+                        <head>
+                            <meta charset="UTF-8">
+                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+							<style>
+								body {
+									background-color: white; /* Ensure the iframe has a white background */
+								}
 
+								
+							</style>
+                        </head>
+                        <body>
+                            <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Three.js FPS Room - Nature</title>
     <style>
-    	:root {
-    		--progress-mask: #209cee;
-    		--background-color: #209cee;
-    	}
+        body { margin: 0; overflow: hidden; background-color: #000; font-family: sans-serif; user-select: none; }
+        
+        /* HUD */
+        #status-text {
+            position: absolute; top: 20px; left: 20px;
+            color: white; background: rgba(0,0,0,0.6); padding: 10px 15px;
+            border-radius: 8px; font-size: 14px; pointer-events: none;
+            backdrop-filter: blur(5px); z-index: 5;
+        }
+
+        /* UI Container */
+        #ui-container {
+            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+            z-index: 10; display: flex; flex-direction: column; align-items: center;
+        }
+
+        /* Control Box */
+        #controls-box {
+            display: flex; gap: 20px; padding: 20px;
+            background: rgba(10, 10, 10, 0.85);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 12px; color: #eee;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            pointer-events: auto;
+            align-items: center;
+        }
+
+        /* Form Elements */
+        .control-group { display: flex; flex-direction: column; align-items: center; }
+        label { font-size: 10px; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.8; font-weight: bold; }
+        input[type=range] { width: 100px; cursor: pointer; accent-color: #fff; }
+        input[type=checkbox] { width: 20px; height: 20px; cursor: pointer; accent-color: #fff; }
+        select {
+            background: #333; color: white; border: 1px solid #555;
+            padding: 4px 8px; border-radius: 4px; cursor: pointer;
+        }
+        select:hover, input:hover { opacity: 1; }
     </style>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+</head>
+<body>
 
-    <section class="hero hero-background is-info is-fullheight">
-      <div class="hero-body">
-        <div class="container">
-          <div class="columns is-vcentered">
-            <div class="column is-offset-2-desktop">
-              <div class="">
-                <h1 class="title red is-2 is-spaced">WebAR demo.</h1>
-                <h2 class="subtitle is-4">View 3D-models in your <strong>browser</strong> and <strong>AR</strong>,<br>on <strong>iOS</strong> and <strong>Android</strong>.</h2>
-              </div>
+    <div id="status-text">
+        <b>Mode: Edit</b><br>Click room to walk (WASD).<br>ESC to unlock.
+    </div>
+
+    <div id="ui-container">
+        <div id="controls-box">
+            <div class="control-group">
+                <label>Windows</label>
+                <select id="windowSelector">
+                    <option value="1">1 Window</option>
+                    <option value="2" selected>2 Windows</option>
+                    <option value="3">3 Windows</option>
+                </select>
             </div>
-            <div class="column is-centered">
-			           	  <div class="viewer-container" style="height: 400px; width: 100%; max-width: 100%">
-              	<model-viewer style="width:100%; height:100%;" src="rc="/assets/dancing_unicorn.glb" ios-src="https://clients.vrtxlabs.com/usdz/dancing_unicorn.usdz" alt="Dancing Unicorn" autoplay camera-controls auto-rotate ar background-color="#209cee"></model-viewer>
-				</div>
-           	  <div class="viewer-container" style="height: 400px; width: 100%; max-width: 100%">
-              	<model-viewer style="width:100%; height:100%;" src="/assets/on_176.glb" ios-src="https://vrtxlabs.com/assets/usdz/porto_couch_animated_ios13.usdz" alt="Wilkhahn" autoplay camera-controls auto-rotate ar background-color="#209cee"></model-viewer>
-				</div>
-			  
+            <div class="control-group">
+                <label>Nature</label>
+                <input type="checkbox" id="envToggle" checked>
             </div>
-          </div>
+            <div class="control-group">
+                <label>Time</label>
+                <input type="range" id="timeSlider" min="0" max="180" value="75">
+            </div>
+            <div class="control-group">
+                <label>Sun Dir</label>
+                <input type="range" id="azimuthSlider" min="-180" max="180" value="-30">
+            </div>
         </div>
-      </div>
-    </section>
-	
+    </div>
 
-	
+    <script type="module">
+        import * as THREE from 'three';
+        import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
+        import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+        import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+        import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+        import { GTAOPass } from 'three/addons/postprocessing/GTAOPass.js';
+        import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+        import { Sky } from 'three/addons/objects/Sky.js';
 
+        // --- Setup ---
+        const scene = new THREE.Scene();
+        
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
+        camera.position.set(0, 1.6, 0); 
+        camera.lookAt(0, 1.6, 4);
 
-	   
+        const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 0.6;
+        document.body.appendChild(renderer.domElement);
 
+        // --- Control Logic ---
+        const controls = new PointerLockControls(camera, document.body);
+        const statusText = document.getElementById('status-text');
 
+        document.addEventListener('click', function(event) {
+            if (event.target.closest('#ui-container')) return;
+            controls.lock();
+        });
 
-    <!-- FOOTER -->
+        controls.addEventListener('lock', () => {
+            statusText.innerHTML = "<b>Mode: Walking</b><br>Press ESC to unlock.";
+            statusText.style.opacity = "0.5";
+        });
 
-    <footer class="footer has-text-centered has-background-dark has-text-light">
-      <div class="container">
-         <div class="columns">
-          <div class="column is-8-desktop is-offset-2-desktop">
-            <p>
-              <strong class="has-text-light has-text-weight-semibold">
-                  Philipp Bontemps 2020
-              </strong>
-            </p>
-            <p>
-              <strong class="has-text-weight-semibold">
-                <a class="has-text-info" href="/impressum">Impressum</a>&nbsp;&nbsp;&nbsp;<a class="has-text-info" href="/datenschutz">Datenschutz</a>
-              </strong>
-            </p>
-            <p style="padding-top: 3rem;">
-              <a target="_blank" href="https://vrtxlabs.com/"><img style="max-height: 19px; margin: 0 10px;" class="vrtx is-inline-block" src="/images/vrtx-hor-new.svg"></a>
-            </p>
-          </div>
-        </div>
-      </div>
-    </footer>
-  </body>
+        controls.addEventListener('unlock', () => {
+            statusText.innerHTML = "<b>Mode: Edit</b><br>Click room to walk (WASD).";
+            statusText.style.opacity = "1.0";
+            moveForward = false; moveBackward = false; moveLeft = false; moveRight = false;
+            velocity.set(0,0,0);
+        });
+
+        // Movement
+        let moveForward = false, moveBackward = false, moveLeft = false, moveRight = false;
+        const velocity = new THREE.Vector3();
+        const direction = new THREE.Vector3();
+        let prevTime = performance.now();
+
+        const onKeyDown = (e) => {
+            switch (e.code) {
+                case 'ArrowUp': case 'KeyW': moveForward = true; break;
+                case 'ArrowLeft': case 'KeyA': moveLeft = true; break;
+                case 'ArrowDown': case 'KeyS': moveBackward = true; break;
+                case 'ArrowRight': case 'KeyD': moveRight = true; break;
+            }
+        };
+        const onKeyUp = (e) => {
+            switch (e.code) {
+                case 'ArrowUp': case 'KeyW': moveForward = false; break;
+                case 'ArrowLeft': case 'KeyA': moveLeft = false; break;
+                case 'ArrowDown': case 'KeyS': moveBackward = false; break;
+                case 'ArrowRight': case 'KeyD': moveRight = false; break;
+            }
+        };
+        document.addEventListener('keydown', onKeyDown);
+        document.addEventListener('keyup', onKeyUp);
+
+        // --- Materials ---
+        const wallMaterial = new THREE.MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.9, side: THREE.DoubleSide });
+        const floorMaterial = new THREE.MeshPhysicalMaterial({ color: 0xeeeeee, roughness: 0.2, clearcoat: 0.3 });
+        
+        // Nature Materials
+        const grassMaterial = new THREE.MeshStandardMaterial({ color: 0x335533, roughness: 1.0 });
+        const treeTrunkMat = new THREE.MeshStandardMaterial({ color: 0x443322, roughness: 1.0 });
+        const treeLeafMat = new THREE.MeshStandardMaterial({ color: 0x225522, roughness: 0.8 });
+
+        // --- Room Geometry (Flush Corners) ---
+        const roomGroup = new THREE.Group();
+        scene.add(roomGroup);
+
+        // Dimensions
+        const roomSize = 8; // Internal space
+        const thick = 0.5; // Wall thickness
+        const outerSize = roomSize + (thick * 2); // 9
+        const wallHeight = 4;
+        const wallY = wallHeight / 2;
+
+        // 1. Floor (9 x 9)
+        const floor = new THREE.Mesh(new THREE.BoxGeometry(outerSize, 0.2, outerSize), floorMaterial);
+        floor.position.y = -0.1; floor.receiveShadow = true;
+        roomGroup.add(floor);
+
+        // 2. Ceiling (9 x 9)
+        const ceil = new THREE.Mesh(new THREE.BoxGeometry(outerSize, 0.2, outerSize), wallMaterial);
+        ceil.position.y = wallHeight + 0.1; ceil.receiveShadow = true; ceil.castShadow = true;
+        roomGroup.add(ceil);
+
+        // 3. Side Walls (Full depth: 9)
+        // Size: 0.5 x 4 x 9
+        const leftWall = new THREE.Mesh(new THREE.BoxGeometry(thick, wallHeight, outerSize), wallMaterial);
+        leftWall.position.set(-(roomSize/2 + thick/2), wallY, 0); // -4.25
+        leftWall.receiveShadow = true; leftWall.castShadow = true;
+        roomGroup.add(leftWall);
+
+        const rightWall = new THREE.Mesh(new THREE.BoxGeometry(thick, wallHeight, outerSize), wallMaterial);
+        rightWall.position.set((roomSize/2 + thick/2), wallY, 0); // 4.25
+        rightWall.receiveShadow = true; rightWall.castShadow = true;
+        roomGroup.add(rightWall);
+
+        // 4. Back Wall (Fits BETWEEN side walls)
+        // Size: 8 x 4 x 0.5
+        const backWall = new THREE.Mesh(new THREE.BoxGeometry(roomSize, wallHeight, thick), wallMaterial);
+        backWall.position.set(0, wallY, -(roomSize/2 + thick/2)); // -4.25
+        backWall.receiveShadow = true; backWall.castShadow = true;
+        roomGroup.add(backWall);
+
+        // 5. Dynamic Front Wall (Fits BETWEEN side walls)
+        const frontWallGroup = new THREE.Group();
+        roomGroup.add(frontWallGroup);
+
+        function buildFrontWall(windowCount) {
+            while(frontWallGroup.children.length > 0){ 
+                const obj = frontWallGroup.children[0];
+                obj.geometry.dispose();
+                frontWallGroup.remove(obj); 
+            }
+            
+            // Logic: The front wall must fill a width of exactly `roomSize` (8).
+            // It is positioned at Z = 4.25
+            const wallZ = (roomSize/2 + thick/2); 
+            const widthToFill = roomSize; 
+            
+            const winH = 2.5; 
+            const winY = 1.8; 
+            const winW = 1.5; 
+
+            // Top Strip (Full Width of internal room)
+            const topStart = winY + winH/2;
+            const topH = wallHeight - topStart;
+            const top = new THREE.Mesh(new THREE.BoxGeometry(widthToFill, topH, thick), wallMaterial);
+            top.position.set(0, topStart + topH/2, wallZ);
+            top.castShadow = true; top.receiveShadow = true;
+            frontWallGroup.add(top);
+
+            // Bottom Strip
+            const botH = winY - winH/2;
+            const bot = new THREE.Mesh(new THREE.BoxGeometry(widthToFill, botH, thick), wallMaterial);
+            bot.position.set(0, botH/2, wallZ);
+            bot.castShadow = true; bot.receiveShadow = true;
+            frontWallGroup.add(bot);
+
+            // Pillars
+            const totalWindowWidth = windowCount * winW;
+            const remainingSpace = widthToFill - totalWindowWidth;
+            const pillarWidth = remainingSpace / (windowCount + 1);
+            
+            // Start cursor at left edge of internal space
+            let currentX = -widthToFill/2; 
+
+            for(let i=0; i <= windowCount; i++) {
+                const p = new THREE.Mesh(new THREE.BoxGeometry(pillarWidth, winH, thick), wallMaterial);
+                p.position.set(currentX + pillarWidth/2, winY, wallZ);
+                p.castShadow = true; p.receiveShadow = true;
+                frontWallGroup.add(p);
+                currentX += pillarWidth + winW; 
+            }
+        }
+        buildFrontWall(2);
+
+        // --- Decoration ---
+        const knot = new THREE.Mesh(new THREE.TorusKnotGeometry(0.5, 0.15, 100, 16), new THREE.MeshPhysicalMaterial({ color: 0xffaa00, roughness: 0.2, metalness: 0.8 }));
+        knot.position.set(-1.5, 0.8, 2); // Lowered slightly since pedestal is gone
+        knot.castShadow = true; knot.receiveShadow = true;
+        scene.add(knot);
+
+        // --- Nature Environment ---
+        const natureGroup = new THREE.Group();
+        scene.add(natureGroup);
+
+        // Grass Plane
+        const grass = new THREE.Mesh(new THREE.PlaneGeometry(60, 60), grassMaterial);
+        grass.rotation.x = -Math.PI / 2;
+        grass.position.y = -0.25; // Slightly below floor
+        grass.receiveShadow = true;
+        natureGroup.add(grass);
+
+        // Simple Procedural Trees
+        const treeGeom = new THREE.ConeGeometry(1, 3, 8);
+        const trunkGeom = new THREE.CylinderGeometry(0.3, 0.4, 1, 8);
+
+        for(let i=0; i<40; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const radius = 7 + Math.random() * 20; // Keep away from room (radius > 7)
+            const x = Math.cos(angle) * radius;
+            const z = Math.sin(angle) * radius;
+
+            const treeGroup = new THREE.Group();
+            treeGroup.position.set(x, -0.25, z);
+
+            // Scale variation
+            const s = 0.8 + Math.random() * 0.8;
+            treeGroup.scale.setScalar(s);
+
+            const trunk = new THREE.Mesh(trunkGeom, treeTrunkMat);
+            trunk.position.y = 0.5;
+            trunk.castShadow = true; trunk.receiveShadow = true;
+            
+            const leaves = new THREE.Mesh(treeGeom, treeLeafMat);
+            leaves.position.y = 2.0;
+            leaves.castShadow = true; leaves.receiveShadow = true;
+
+            treeGroup.add(trunk);
+            treeGroup.add(leaves);
+            natureGroup.add(treeGroup);
+        }
+
+        // --- Lighting ---
+        const sunLight = new THREE.DirectionalLight(0xffffff, 3.0);
+        sunLight.castShadow = true;
+        sunLight.shadow.mapSize.set(4096, 4096);
+        sunLight.shadow.camera.left = -30; sunLight.shadow.camera.right = 30;
+        sunLight.shadow.camera.top = 30; sunLight.shadow.camera.bottom = -30;
+        sunLight.shadow.bias = -0.0005;
+        scene.add(sunLight);
+
+        const hemiLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.1);
+        scene.add(hemiLight);
+
+        const sky = new Sky();
+        sky.scale.setScalar(450000);
+        scene.add(sky);
+        
+        const sunPos = new THREE.Vector3();
+        function updateEnvironment() {
+            const time = document.getElementById('timeSlider').value;
+            const azim = document.getElementById('azimuthSlider').value;
+            
+            const phi = THREE.MathUtils.degToRad(90 - time);
+            const theta = THREE.MathUtils.degToRad(azim);
+            
+            sunPos.setFromSphericalCoords(1, phi, theta);
+            sunLight.position.copy(sunPos).multiplyScalar(50);
+            sky.material.uniforms['sunPosition'].value.copy(sunLight.position);
+
+            const elevation = 90 - time;
+            if(elevation < 5) {
+                sunLight.intensity = 0; hemiLight.intensity = 0.05;
+            } else if (elevation < 20) {
+                sunLight.color.setHSL(0.1, 0.9, 0.6); 
+                sunLight.intensity = 2; hemiLight.intensity = 0.2;
+            } else {
+                sunLight.color.setHSL(0.1, 0.1, 1.0); 
+                sunLight.intensity = 4; hemiLight.intensity = 0.5;
+            }
+        }
+
+        // --- Post Processing ---
+        const composer = new EffectComposer(renderer);
+        composer.addPass(new RenderPass(scene, camera));
+
+        const gtaoPass = new GTAOPass(scene, camera, window.innerWidth, window.innerHeight);
+        gtaoPass.output = GTAOPass.OUTPUT.Default;
+        gtaoPass.blendIntensity = 1;
+        composer.addPass(gtaoPass);
+
+        const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
+        bloomPass.threshold = 0.8; bloomPass.strength = 0.35; bloomPass.radius = 0.4;
+        composer.addPass(bloomPass);
+
+        composer.addPass(new OutputPass());
+
+        // --- Events ---
+        document.getElementById('timeSlider').addEventListener('input', updateEnvironment);
+        document.getElementById('azimuthSlider').addEventListener('input', updateEnvironment);
+        document.getElementById('windowSelector').addEventListener('change', (e) => buildFrontWall(parseInt(e.target.value)));
+        document.getElementById('envToggle').addEventListener('change', (e) => {
+            natureGroup.visible = e.target.checked;
+        });
+        
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            composer.setSize(window.innerWidth, window.innerHeight);
+            gtaoPass.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        updateEnvironment();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            const time = performance.now();
+            const delta = (time - prevTime) / 1000;
+
+            if (controls.isLocked) {
+                velocity.x -= velocity.x * 10.0 * delta;
+                velocity.z -= velocity.z * 10.0 * delta;
+                direction.z = Number(moveForward) - Number(moveBackward);
+                direction.x = Number(moveRight) - Number(moveLeft);
+                direction.normalize(); 
+                if (moveForward || moveBackward) velocity.z -= direction.z * 100.0 * delta;
+                if (moveLeft || moveRight) velocity.x -= direction.x * 100.0 * delta;
+                controls.moveRight(-velocity.x * delta);
+                controls.moveForward(-velocity.z * delta);
+                if (controls.getObject().position.y !== 1.6) controls.getObject().position.y = 1.6;
+            }
+
+            prevTime = time;
+            knot.rotation.x += 0.005; knot.rotation.y += 0.01;
+            composer.render();
+        }
+        animate();
+
+    </script>
+</body>
 </html>
+
+							<script>
+                            	
+							</script>
+                        </body>
+                        </html>
+                    
